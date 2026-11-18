@@ -19,6 +19,7 @@ on:
 jobs:
   test-homebrew-build:
     runs-on: macos-latest
+    timeout-minutes: 30
 
     steps:
       - name: Check out code
@@ -28,6 +29,22 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version-file: "go.mod"
+
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('go.mod', 'go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Cache Homebrew downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Caches/Homebrew
+          key: ${{ runner.os }}-brew-${{ hashFiles('go.mod', 'go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-brew-
 
       - name: Verify Homebrew is installed
         run: |
